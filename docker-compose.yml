@@ -12,11 +12,5 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./prisma/sql/:/docker-entrypoint-initdb.d/
-  api:
-    container_name: teste_guia_api
-  dashboard:
-    container_name: teste_guia_dashboard
-    image: imageName
-
 volumes:
   postgres:
