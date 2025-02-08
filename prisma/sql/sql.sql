@@ -34,6 +34,9 @@ CREATE TABLE "analysis" (
     "satisfaction" INTEGER NOT NULL,
     "summary" TEXT NOT NULL,
     "improvement" TEXT NOT NULL,
+    "output_tokens" INTEGER NOT NULL,
+    "input_tokens" INTEGER NOT NULL,
+    "llm_model" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "analysis_pkey" PRIMARY KEY ("id")

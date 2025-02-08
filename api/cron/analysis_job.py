@@ -7,7 +7,7 @@ from ia.schema import CreateAnalysisSchema
 from helpers.format_message import format_messages
 from ia.ia import ainvoke
 from repositories import get_analysis_repository, get_session_repository
-from dependencies import get_session_db
+from database import get_database_client
 
 # Configuração básica do logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -60,6 +60,8 @@ async def analysis_chatbot_cron_job():
     logging.info("Starting the chatbot analysis cron job...")
 
     try:
+        db = get_database_client()
+        
         async with Prisma() as db:
             session_repository = get_session_repository(db=db)
             analysis_repository = get_analysis_repository(db=db)

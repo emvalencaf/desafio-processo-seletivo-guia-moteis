@@ -2,13 +2,9 @@ from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 
-from database import get_database_client
-from repositories import get_session_repository
-from dependencies import get_session_db
 from cron.analysis_job import run_analysis_job
 from cron.job import add_cron_job
-from config import global_settings
-from prisma import Prisma
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

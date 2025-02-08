@@ -21,6 +21,9 @@ class CreateAnalysisSchema(BaseModel):
     summary: str
     improvement: str
     satisfaction: int
+    input_tokens: int
+    output_tokens: int
+    llm_model: str
     
     @classmethod
     def from_analyse(cls, session_id: int, analyse: AnalyseSchema):
@@ -28,6 +31,9 @@ class CreateAnalysisSchema(BaseModel):
         return cls(
             session_id=session_id,
             satisfaction=analyse.satisfaction,
-            summary='\n'.join(analyse.summary),  # Converte lista para JSON string
-            improvement='\n'.join(analyse.improvement)  # Converte lista para JSON string
+            summary='\n'.join(analyse.summary),
+            improvement='\n'.join(analyse.improvement),
+            output_tokens=analyse.metadata.output_tokens,
+            input_tokens=analyse.metadata.input_tokens,
+            llm_model=analyse.metadata.llm_model,
         )

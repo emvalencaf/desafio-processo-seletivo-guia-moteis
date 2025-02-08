@@ -1,5 +1,5 @@
 from prisma.actions import sessionActions
-from prisma.models import session, analysis, motel
+from prisma.models import session, analysis
 from prisma import Prisma
 
 def get_session_repository(db: Prisma) -> sessionActions[session]:
