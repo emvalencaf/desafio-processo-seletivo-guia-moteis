@@ -15,6 +15,29 @@ A proposta é criar uma *end-to-end LLM app* para analisar as mensagens de inter
 
 ![Diagrama da Arquitetura Geral](/docs/diagrams/general_architecture.png)
 
+Periodicamente o servidor fará requests ao banco de dados para resgatar as sessões (e as mensagens à ela atrelada) que serão processadas pela inteligência artificial generativa (via modelo: `gpt-4o-mini`) para avaliar o comportamento do chatbot. Para garantir uma análise de dados posterior será feito o scrapping de um website que possui os preços dos modelos de IA Generativa tabelados. Então,O processamento será feito de forma assíncrono (cada sessão será processada paralelamente) e, ao final, as avaliações serão persistidas no banco de dados.
+
+![Diagrama de Fluxo do Cron Job](/docs/diagrams/cron_flow.png)
+
+O esquema esperado é:
+
+| coluna | tipo | descrição |
+| - | - | - |
+| id | INTEGER | chave primária da tabela |
+| session_id | INTEGER | chave estrangeira da sessão |
+| satisfaction | INTEGER | campo que indica o quão satisfatório foi o comportamento da IA (de 0 a 10) |
+| summary | TEXT | campo texto que lista em bullet-points o resumo da sessão |
+| improvement | TEXT | campo texto que lista em bullet-points o que deve ser aprimorado |
+| output_tokens | INTEGER | campo que indica quantos tokens foram gastos para gerar a resposta |
+| input_tokens|INTEGER | campo que indica quantos tokens foram gastos para instruir o modelo |
+| input_tokens_price | DECIMAL(10,6) | campo que indica o preço em USD$ a cada 1 milhão de tokens de entrada |
+| output_tokens_price | DECIMAL(10,6) | campo que indica o preço em USD$ a cada 1 milhão de tokens de saída |
+| llm_model | TEXT | campo que indica o id do modelo usado para a análise |
+| created_at | TIMESTAMP | campo que indica o quando a análise foi criada |
+
+**Observação**: A `OpenAI` não disponibiliza em sua API o preço dos tokens de entrada e saída para cada um dos seus modelos. Tampouco foi possível fazer o *scrapping* direto do website da `OpenAI`. Por essa razão, buscou-se um website em que fosse possível extrair os dados. A persistência desses dados facilita extrair *insights* e avaliar métricas como para **custo por interação**, **inficiência do modelo** e **retorno sobre investimento (ROI)** validar o chatbot.
+
+
 ## Estrutura do projeto
 ```plaintext
 |__ api/
@@ -25,6 +48,7 @@ A proposta é criar uma *end-to-end LLM app* para analisar as mensagens de inter
 |    |__ helpers/  # Utility functions for formatting and parsing
 |    |    |__ format_message.py  # Formats messages for chatbot analysis
 |    |    |__ parser_output.py  # Parses the output from AI responses
+|    |    |__ token_price_scrapping.py # Scrap the tokens prices for gen ai models
 |    |
 |    |__ ia/  # AI-related logic and processing
 |    |    |__ templates/  # Stores AI prompt templates
@@ -302,10 +326,6 @@ Esse ajuste permitiria uma melhor monitoramento em produção do processo de ``L
 
 ## Como usar
 
-
-## Fontes consultadas
-
-- [Build and deploy Python cron scheduler using APscheduler and Heroku](https://medium.com/@sauravkumarsct/build-and-deploy-python-cron-scheduler-using-apscheduler-and-heroku-8c90ce4ba069)
 
 
 # Enunciado - Desafio de Análise de Conversas com OpenAI
