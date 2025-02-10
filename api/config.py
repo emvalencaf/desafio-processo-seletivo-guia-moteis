@@ -30,11 +30,6 @@ class GlobalConfig(BaseSettings):
     if not DATABASE_URL:
         raise ValueError("You must pass a url database as a environment variable (DATABASE_URL) to run this project.")
     
-    BACKEND_PORT: int = int(getenv("BACKEND_PORT",
-                                   8000))
-    BACKEND_HOST: str = str(getenv("BACKEND_HOST",
-                                   "localhost"))
-    
     DASHBOARD_URL: str = str(getenv("DASHBOARD_URL",
                                     "http://localhost:8501"))
     

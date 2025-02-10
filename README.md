@@ -41,6 +41,9 @@ O esquema esperado é:
 ## Estrutura do projeto
 ```plaintext
 |__ api/
+|    |__ analysis/
+|    |    |__ router.py # Routes for analysis endpoint
+|    |
 |    |__ cron/  # Contains scheduled jobs for background tasks
 |    |    |__ analysis_job.py  # Script for processing chatbot session analysis
 |    |    |__ job.py  # General cron job management script
@@ -69,19 +72,34 @@ O esquema esperado é:
 |    |__ lifespan.py  # Manages FastAPI application startup/shutdown events
 |    |__ repositories.py  # Database repository layer for handling queries
 |    |__ router.py  # Defines API routes for FastAPI
+|    |__ schema.prisma  # Prisma schema definition for database models
+|    |__ Dockerfile
+|
+|__ dashboard/
+|    |__ api/
+|    |    |__ analysis.py # fetches analysis data from backend
+|    |__ helpers/
+|    |    |__ daterange_filter.py # filter dataframe by date range
+|    |    |__ format.py # formatando decimais
+|    |    |__ kpi.py # calculate kpi data
+|    |    |__ plots.py # plot data
+|    |__ ui/
+|    |    |__ sidebar.py # ui of sidebar
+|    |__ app.py # stremlit app
+|    |__ config.py # config env variables
+|    |__ requirements.txt
+|    |__ Dockerfile
 |
 |__ prisma/  # Prisma ORM-related files
 |     |__ sql/  # Stores raw SQL queries or migrations
-|     |    |__ sql.sql  # SQL script file
-|     |
-|     |__ schema.prisma  # Prisma schema definition for database models
+|          |__ sql.sql  # SQL script file
 |
 |__ dashboard/  # Placeholder for the dashboard interface (could be frontend or admin panel)
 
 ```
 
 As *features* são:
-- **Visualizar as métricas de satisfação**
+- **Visualizar as métricas de satisfação e gasto de tokens**
 - **Avaliações**
 - **Monitoramento da Gen AI**
 
@@ -297,15 +315,6 @@ Histórico da Sessão:
 """
 ````
 
-###### Melhorias
-
-Melhorias para o futuro seria armazenar esses *prompts* em um *storage* e fazer a chamadas no código e coordenar a leitura dele com a leitura do metadados da prompt, algo como uma tabela:
-
-|prompt_id|prompt_path|created_at|updated_at|
-|-|-|-|-|
-
-Esse ajuste permitiria uma melhor monitoramento em produção do processo de ``LLMOps``, permitindo saber em um dashboard quais prompts estão performando melhor.
-
 #### Variáveis de ambiente do módulo `api/`
 
 - `DB_URL`: essa variável deve conter a URL do banco de dados (ex: postgresql://{usuario}:{senha}@{host}:{porta}/{database}?schema={esquema}).
@@ -316,17 +325,48 @@ Esse ajuste permitiria uma melhor monitoramento em produção do processo de ``L
 - `LLM_MODEL_MAX_TOKENS`(***Opcional***): essa variável deve conter a quantidade máxima de tokens de saída o modelo deve gerar. Padrão: `280`
    - É recomendável colocar o valor necessário para fazer o trabalho. Lembrando que os tokens de saída são mais caros que os tokens de entrada.
 - `ENVIRONMENT`(***Opcional***): essa variável deve conter qual é o ambiente que o projeto vai rodar: `DEVELOPMENT`, `TEST` e `PRODUCTION`. Padrão: `DEVELOPMENT`.
-- `DASHBOARD_URL`(***Opcional***): essa variável contém a URL do frontend do dashboard para fins de COORS. Padrão: `http://localhost:`
-- `BACKEND_PORT`(***Opcional***): essa variável contém a porta em que o servidor vai rodar. Padrão: `8000`
-- `BACKEND_HOST` (***Opcional***): essa variável contém o host do servidor. Padrão: `localhost`
+- `DASHBOARD_URL`(***Opcional***): essa variável contém a URL do frontend do dashboard para fins de COORS. Padrão: `http://localhost:8051`
 - `V_STR`(***Opcional***): essa variável contém o número da versão da API. Padrão: `v1`
 - `CRONTAB`(***Opcional***): essa variável contém a expressão para agendar a frequência que o cronjob vai ser executado. Padrão: ``* * * * *``(a cada 1 minuto)
+
+### `dashboard/`
+
+O módulo `dashboard/` é responsável por operar a lógica do `frontend` da aplicação WEB criando uma interface para que o usuário possa ver e explorar os dados que estão na base de dados.
+
+#### Variáveis de ambiente do módulo `dashboard`
+
+- `BACKEND_URL`: essa variável contém a url do backend ({host}:{port}/api/{V_STR}) para fazer o fetch dos dados. Padrão: `localhost:8000/api/v1`
+
+## Observações
+
+A depender dos dados que estão sendo processados seria necessário adicionar uma camada de lógica para garantir o processo de anonimatização de dados sensíveis que sejam passados no chatbot. O que poderia ser feito usando processamento de linguagem natural.
+
+## Melhorias
+
+Melhorias para o futuro seria:
+
+1. **Armazenamento de Prompts**: armazenar esses *prompts* em um *storage* e fazer a chamadas no código e coordenar a leitura dele com a leitura do metadados da prompt, algo como uma tabela:
+
+|prompt_id|prompt_path|created_at|updated_at|
+|-|-|-|-|
+
+Esse ajuste permitiria uma melhor monitoramento em produção do processo de ``LLMOps``, permitindo saber em um dashboard quais prompts estão performando melhor.
+
+2. ***Avaliação Humana**: implementar no `dashboard` uma interface para que o usuário pudesse fazer uma avaliação humana de uma porcentagem das análises feitas pela GenAI. Seria renderizado tanto as mensagens associadas a análise quanto a análise e o revisor humano apenas aprovaria ou desaprovaria e escreveria um breve comentário.
+
+Os ajustes necessários seriam na tabela análise que receberia os seguintes atributos: `approved_by_human` e `human_review`.
+
+A ideia principal seria manter o ``LLMOps`` permitindo que conseguisse por uma margem estatística supervisionar a aplicação de Gen AI
+
 
 ## Requisitos
 
 ## Como usar
 
-
+1. No diretório raiz do projeto, execute:
+```bash
+docker-compose up --build
+```
 
 # Enunciado - Desafio de Análise de Conversas com OpenAI
 

@@ -26,6 +26,4 @@ if __name__ == "__main__":
     
     uvicorn.run("main:app",
                 log_level='info',
-                host=global_settings.BACKEND_HOST,
-                port=global_settings.BACKEND_PORT,
                 reload=True)
