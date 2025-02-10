@@ -36,6 +36,8 @@ CREATE TABLE "analysis" (
     "improvement" TEXT NOT NULL,
     "output_tokens" INTEGER NOT NULL,
     "input_tokens" INTEGER NOT NULL,
+    "input_tokens_price" DECIMAL(10,6) NOT NULL,
+    "output_tokens_price" DECIMAL(10,6) NOT NULL,
     "llm_model" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
