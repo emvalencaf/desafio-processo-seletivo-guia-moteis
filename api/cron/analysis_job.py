@@ -8,11 +8,16 @@ from helpers.format_message import format_messages
 from ia.ia import ainvoke
 from repositories import get_analysis_repository, get_session_repository
 from database import get_database_client
+from helpers.token_price_scrapping import extract_model_price_details
+from config import global_settings
+from decimal import Decimal
 
 # Configuração básica do logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-async def process_session(session: session):
+async def process_session(session: session,
+                          input_tokens_price: Decimal,
+                          output_tokens_price: Decimal):
     """
     Processes a single session and returns the analysis result.
 
@@ -34,10 +39,12 @@ async def process_session(session: session):
         response = await ainvoke(input=formatted_messages)
 
         logging.info(response)
-        
+                
         return CreateAnalysisSchema.from_analyse(
             session_id=session.id,
-            analyse=response
+            analyse=response,
+            price_details={ "input_tokens_price" : input_tokens_price,
+                            "output_tokens_price" : output_tokens_price }
         )
     except Exception as e:
         logging.error(f"Error processing session {session.id}: {e}")
@@ -78,10 +85,16 @@ async def analysis_chatbot_cron_job():
 
             logging.info(f"{len(sessions)} sessions found for analysis.")
 
-            # Create tasks to process all sessions at once
-            results = await asyncio.gather(*[process_session(session) for session in sessions])
+            logging.info(f"Starting scrapping for the tokens prices of the {global_settings.LLM_MODEL_URI}...")
 
-            # Filter sessions that did not fail
+            model_price_details = extract_model_price_details(model_id=global_settings.LLM_MODEL_URI)[0]
+
+            input_tokens_price, output_tokens_price = model_price_details.input_tokens, model_price_details.output_tokens
+
+            results = await asyncio.gather(*[process_session(session,
+                                                             output_tokens_price=output_tokens_price,
+                                                             input_tokens_price=input_tokens_price) for session in sessions])
+
             list_analysis = [analysis for analysis in results if analysis is not None]
 
             if list_analysis:

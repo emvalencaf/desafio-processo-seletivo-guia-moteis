@@ -24,9 +24,11 @@ class CreateAnalysisSchema(BaseModel):
     input_tokens: int
     output_tokens: int
     llm_model: str
+    output_tokens_price: float = Field(description="output token price ($) for 1 million tokens.")
+    input_tokens_price: float = Field(description="input token price ($) for 1 million tokens.")
     
     @classmethod
-    def from_analyse(cls, session_id: int, analyse: AnalyseSchema):
+    def from_analyse(cls, session_id: int, analyse: AnalyseSchema, price_details: dict):
         """Converts AnalyseSchema to CreateAnalysisSchema"""
         return cls(
             session_id=session_id,
@@ -36,4 +38,6 @@ class CreateAnalysisSchema(BaseModel):
             output_tokens=analyse.metadata.output_tokens,
             input_tokens=analyse.metadata.input_tokens,
             llm_model=analyse.metadata.llm_model,
+            input_tokens_price=price_details.get("input_tokens_price"),
+            output_tokens_price=price_details.get("output_tokens_price")
         )
