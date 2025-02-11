@@ -361,12 +361,35 @@ A ideia principal seria manter o ``LLMOps`` permitindo que conseguisse por uma m
 
 ## Requisitos
 
-## Como usar
+As principais ferramentas para esse software:
 
-1. No diretório raiz do projeto, execute:
+<img src="https://img.shields.io/badge/python-3.11.5-blue?logo=python">
+<img src="https://img.shields.io/badge/docker-27.2.0-blue?logo=docker">
+<img src="https://img.shields.io/badge/postgresql-latest-blue?logo=postgresql">
+<img src="https://img.shields.io/badge/fastapi-0.115.8-blue?logo=fastapi">
+<img src="https://img.shields.io/badge/streamlit-1.42.0-blue?logo=streamlit">
+<img src="https://img.shields.io/badge/pandas-2.2.3-blue?logo=pandas">
+<img src="https://img.shields.io/badge/prisma python-0.15.0-blue?logo=prisma">
+
+
+## Como usar
+1. Crie um arquivo `.env` na raiz do projeto e preencha as seguintes variáveis:
+
+```plaintext
+POSTGRES_PASSWORD="teste_guia"
+POSTGRES_USER="teste_guia"
+POSTGRES_DB="teste_guia"
+DATABASE_URL="postgresql://teste_guia:teste_guia@localhost:5432/teste_guia?schema=public"
+OPENAI_API_KEY=<coloque a API KEY da OPENAI>
+CRONTAB="* * * * *"
+```
+2. No diretório raiz do projeto, execute:
+
 ```bash
 docker-compose up --build
 ```
+
+**OBSERVAÇÃO**: O `CRONTAB` é a variável responsável por determinar a frequência em que o *cronjob* será executado. Por padrão, o *cronjob* está sendo programado para executar a cada minuto. Mas, a ideia é que seja feito em intervalos de tempo maiores, como, a cada 12 horas ou semanalmente.
 
 # Enunciado - Desafio de Análise de Conversas com OpenAI
 
@@ -393,6 +416,7 @@ A aplicação deve utilizar a API `https://api.openai.com/v1/chat/completions` c
 ## Execução
 
 1. No diretório raiz do projeto, execute:
+
    ```bash
    docker-compose up --build
    ```
